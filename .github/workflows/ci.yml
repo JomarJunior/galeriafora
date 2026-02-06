@@ -38,7 +38,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.venv-cache.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --with=dev
+        run: poetry install --no-interaction --all-groups
 
       - name: Check pyproject.toml
         run: poetry check
