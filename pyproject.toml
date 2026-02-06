@@ -1,0 +1,92 @@
+[project]
+name = "galeriafora"
+version = "0.1.0"
+description = "A microservice for integrating third-party galleries into the **🖼️ MiraVeja** ecosystem"
+authors = [
+    {name = "JomarJunior",email = "jomarjunior@poli.ufrj.br"}
+]
+license-files = ["LICENSE"]
+readme = "README.md"
+requires-python = ">=3.10,<3.15"
+dependencies = [
+    "miraveja-di (>=0.1.0,<0.2.0)",
+    "miraveja-log (>=0.1.0,<0.2.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 120
+known_first_party = ["galeriafora"]
+
+[tool.pylint.master]
+ignore = ["tests", "venv", ".venv", "build", "dist", "main.py", "examples/"]
+jobs = 0
+module-naming-style = "snake_case"
+const-naming-style = "UPPER_CASE"
+class-naming-style = "PascalCase"
+function-naming-style = "snake_case"
+method-naming-style = "snake_case"
+attr-naming-style = "snake_case"
+argument-naming-style = "snake_case"
+variable-naming-style = "snake_case"
+load-plugins = ["pylint_pydantic", "pylint_pytest"]
+good-names = ["memory_mB"]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.messages_control]
+disable = [
+    "C0114", "C0115", "C0116", "R0917", "W0622",
+    "R0903", "W0718", "R0801", "E1136", "R0913"
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=src/galeriafora",
+    "--cov-report=html",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-fail-under=80"
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "gpu: marks tests that require GPU"
+]
+
+[tool.coverage.run]
+omit = [
+    "__init__.py",
+    "main.py",
+    "**/examples/**",
+]
+
+[dependency-groups]
+dev = [
+    "pytest (>=8.2,<9.0)",
+    "black (>=25.11,<26.0)",
+    "isort (>=7.0.0,<8.0.0)",
+    "mypy (>=1.19.1,<2.0.0)",
+    "pylint (>=4.0.4,<5.0.0)",
+    "pre-commit (>=4.5.1,<5.0.0)",
+    "pylint-pydantic (>=0.4.1,<0.5.0)",
+    "pylint-pytest (>=1.1.8,<2.0.0)"
+]

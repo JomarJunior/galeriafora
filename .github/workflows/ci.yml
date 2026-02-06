@@ -1,0 +1,144 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # -----------------------
+  # 1️⃣ Build / Dependency Check
+  # -----------------------
+  build:
+    name: 🚀 Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python + Poetry + Cache
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.0.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Restore virtualenv cache
+        id: venv-cache
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.venv-cache.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction
+
+      - name: Check pyproject.toml
+        run: poetry check
+
+  # -----------------------
+  # 2️⃣ Linting
+  # -----------------------
+  lint:
+    name: 🧹 Linting
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: snok/install-poetry@v1
+        with:
+          version: 2.0.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - uses: actions/cache@v4
+        id: venv-cache
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - run: poetry install --no-interaction
+      - name: Run linter
+        run: poetry run pylint src/galeriafora
+
+  # -----------------------
+  # 3️⃣ Code formatting
+  # -----------------------
+  format-check:
+    name: 🎨 Code format
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: snok/install-poetry@v1
+        with:
+          version: 2.0.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - uses: actions/cache@v4
+        id: venv-cache
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - run: poetry install --no-interaction
+      - name: Check code format
+        run: poetry run black --check src/galeriafora tests
+      - name: Check import sorting
+        run: poetry run isort --check-only src/galeriafora tests
+
+  # -----------------------
+  # 4️⃣ Static type checking
+  # -----------------------
+  static-type-check:
+    name: 🧪 Static Type Checking
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: snok/install-poetry@v1
+        with:
+          version: 2.0.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - uses: actions/cache@v4
+        id: venv-cache
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - run: poetry install --no-interaction
+      - name: Run static type checker
+        run: poetry run mypy src/galeriafora tests
+
+  # -----------------------
+  # 5️⃣ Unit / Integration tests
+  # -----------------------
+  test:
+    name: ✅ Unit / Integration tests
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: snok/install-poetry@v1
+        with:
+          version: 2.0.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - uses: actions/cache@v4
+        id: venv-cache
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - run: poetry install --no-interaction
+      - name: Run unit tests
+        run: poetry run pytest tests/unit
+      - name: Run integration tests
+        run: poetry run pytest tests/integration
