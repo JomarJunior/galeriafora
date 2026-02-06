@@ -142,3 +142,9 @@ jobs:
         run: poetry run pytest tests/unit
       - name: Run integration tests
         run: poetry run pytest tests/integration
+      - name: Upload coverage report to codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
