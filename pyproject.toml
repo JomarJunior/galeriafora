@@ -10,7 +10,9 @@ readme = "README.md"
 requires-python = ">=3.10,<3.15"
 dependencies = [
     "miraveja-di (>=0.1.0,<0.2.0)",
-    "miraveja-log (>=0.1.0,<0.2.0)"
+    "miraveja-log (>=0.1.0,<0.2.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "dotenv (>=0.9.9,<0.10.0)"
 ]
 
 [build-system]
@@ -32,7 +34,7 @@ line_length = 120
 known_first_party = ["galeriafora"]
 
 [tool.pylint.master]
-ignore = ["tests", "venv", ".venv", "build", "dist", "main.py", "examples/"]
+ignore = ["venv", ".venv", "build", "dist", "main.py", "examples/"]
 jobs = 0
 module-naming-style = "snake_case"
 const-naming-style = "UPPER_CASE"

@@ -173,21 +173,56 @@ The `ExternalMedia` value object represents the canonical media item fetched fro
     "url": "string",
     "title": "string",
     "description": "string",
+    "content_metadata": "ContentMetadata"
     "tags": ["string"],
-    "rating": "Rating",
-    "ai_metadata": "AiMetadata",
+    "mature_rating": "MatureRating",
+    "ai_metadata": "AiMetadata | null",
     "provider": "ExternalProviderInfo"
 }
 ```
 
-#### Rating
+### ContentMetadata
 
-The `Rating` enumeration defines the content rating of media items, such as `PG`, `PG-13`, `R`, etc., which can be used for filtering and display purposes.
+The `ContentMetadata` value object contains additional information about the media content, such as dimensions, file size, and creation date.
+
+```json
+{
+    "content_type": "ContentType",
+    "dimensions": {
+        "width": "integer",
+        "height": "integer"
+    },
+    "file_size": "string",
+}
+```
+
+#### ContentType
+
+The `ContentType` enumeration defines the type of media content, such as `image`, `video`, `gif`, etc., which can be used for filtering and display purposes.
+
+```python
+
+from enum import Enum
+
+class ContentType(str, Enum):
+    IMAGE_JPEG = "image/jpeg"
+    IMAGE_PNG = "image/png"
+    VIDEO_MP4 = "video/mp4"
+    VIDEO_WEBM = "video/webm"
+    GIF = "image/gif"
+
+    def __str__(self):
+        return self.value
+```
+
+#### MatureRating
+
+The `MatureRating` enumeration defines the content rating of media items, such as `PG`, `PG-13`, `R`, etc., which can be used for filtering and display purposes.
 
 ```python
 from enum import Enum
 
-class Rating(str, Enum):
+class MatureRating(str, Enum):
     PG = "PG"
     PG_13 = "PG-13"
     R = "R"
@@ -522,7 +557,7 @@ GaleriaFora employs a GitHub Actions workflow that runs on every push and pull r
 
 Domain and application layer tests focus on business logic without external dependencies:
 
-- **Domain Tests**: Validate entity creation, value object invariants (e.g., `ProviderName` normalization), and enum behaviors (`Rating`, `ProviderCapability`).
+- **Domain Tests**: Validate entity creation, value object invariants (e.g., `ProviderName` normalization), and enum behaviors (`MatureRating`, `ProviderCapability`).
 - **Application Service Tests**: Mock `IExternalProvider` implementations to test orchestration logic in `MediaFetcher`, `MediaUploader`, and `ProviderCoordinator` without invoking real APIs.
 - **Use Case Tests**: Verify end-to-end workflows (fetch → cache → paginate) with injected mock providers.
 
