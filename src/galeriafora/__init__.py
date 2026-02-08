@@ -12,6 +12,18 @@ Key components:
 - api: REST endpoints for MiraVeja integration
 """
 
+from galeriafora.domain import (
+    AiMetadata,
+    ContentMetadata,
+    ContentType,
+    ExternalMedia,
+    ExternalProviderCapability,
+    ExternalProviderInfo,
+    MatureRating,
+    Page,
+    ProviderName,
+)
+
 __version__ = "0.1.0"
 __author__ = "Jomar Júnior de Souza Pereira"
 __email__ = "jomarjunior@poli.ufrj.br"
@@ -20,4 +32,14 @@ __all__ = [
     "__version__",
     "__author__",
     "__email__",
+    # Domain models
+    "ProviderName",
+    "Page",
+    "MatureRating",
+    "ContentType",
+    "ContentMetadata",
+    "AiMetadata",
+    "ExternalProviderCapability",
+    "ExternalProviderInfo",
+    "ExternalMedia",
 ]

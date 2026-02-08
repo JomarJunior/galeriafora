@@ -5,7 +5,6 @@ from galeriafora.domain.exceptions import (
     CannotCreateProviderNameThatNormalizesToEmptyException,
     CannotCreateProviderNameWithEmptyNameException,
     CannotCreateProviderNameWithNonStringNameException,
-    CannotCreateProviderNameWithOnlyNonAlphanumericCharactersException,
 )
 
 
@@ -59,15 +58,11 @@ class TestProviderName:
             ProviderName("   ")
 
     def test_creation_with_non_string_name_should_raise_error(self):
-        with pytest.raises(TypeError):
+        with pytest.raises(CannotCreateProviderNameWithNonStringNameException):
             ProviderName(123)
 
-    def test_creation_with_name_with_only_non_alphanumeric_characters_should_raise_error(self):
-        with pytest.raises(CannotCreateProviderNameWithEmptyNameException):
-            ProviderName("!@#$%^&*()")
-
     def test_creation_with_name_that_normalizes_to_empty_should_raise_error(self):
-        with pytest.raises(CannotCreateProviderNameWithEmptyNameException):
+        with pytest.raises(CannotCreateProviderNameThatNormalizesToEmptyException):
             ProviderName("   !@#$%^&*()   ")
 
     def test_creation_with_name_that_normalizes_to_valid_name(self):
