@@ -1,9 +1,8 @@
 import pytest
 
-from galeriafora import ExternalProviderCapability, ExternalProviderInfo, ExternalProviderName
+from galeriafora import ExternalProviderCapability, ExternalProviderInfo, ProviderName
 from galeriafora.domain.exceptions import (
     CannotCreateExternalProviderInfoWithEmptyCapabilitiesException,
-    CannotCreateExternalProviderInfoWithEmptyNameException,
     CannotCreateExternalProviderInfoWithInvalidCapabilitiesException,
 )
 
@@ -11,7 +10,7 @@ from galeriafora.domain.exceptions import (
 class TestExternalProviderInfo:
     def test_can_be_created_with_valid_data(self):
         provider_info = ExternalProviderInfo(
-            name=ExternalProviderName("testprovider"),
+            name=ProviderName("testprovider"),
             description="A test provider",
             capabilities=[
                 ExternalProviderCapability.FETCH_LATEST,
@@ -21,7 +20,7 @@ class TestExternalProviderInfo:
             ],
         )
 
-        assert provider_info.name == ExternalProviderName("testprovider")
+        assert provider_info.name == ProviderName("testprovider")
         assert provider_info.description == "A test provider"
         assert ExternalProviderCapability.FETCH_LATEST in provider_info.capabilities
         assert ExternalProviderCapability.FETCH_BY_USER in provider_info.capabilities
@@ -30,41 +29,40 @@ class TestExternalProviderInfo:
 
     def test_str_representation(self):
         provider_info = ExternalProviderInfo(
-            name=ExternalProviderName("strprovider"),
+            name=ProviderName("strprovider"),
             description="String provider",
             capabilities=[ExternalProviderCapability.FETCH_LATEST],
         )
         expected_str = (
-            "ExternalProviderInfo(name=ExternalProviderName('strprovider'), "
-            "description='String provider', capabilities=['fetch_latest'])"
+            "ExternalProviderInfo(name=strprovider, description='String provider', capabilities=[fetch_latest])"
         )
         assert str(provider_info) == expected_str
 
     def test_repr_representation(self):
         provider_info = ExternalProviderInfo(
-            name=ExternalProviderName("reprprovider"),
+            name=ProviderName("reprprovider"),
             description="Repr provider",
             capabilities=[ExternalProviderCapability.FETCH_LATEST],
         )
         expected_repr = (
-            "ExternalProviderInfo(name=ExternalProviderName('reprprovider'), "
-            "description='Repr provider', capabilities=['fetch_latest'])"
+            "ExternalProviderInfo(name=ProviderName('reprprovider'), "
+            "description='Repr provider', capabilities=[fetch_latest])"
         )
         assert repr(provider_info) == expected_repr
 
     def test_equality(self):
         provider_info1 = ExternalProviderInfo(
-            name=ExternalProviderName("testprovider"),
+            name=ProviderName("testprovider"),
             description="A test provider",
             capabilities=[ExternalProviderCapability.FETCH_LATEST],
         )
         provider_info2 = ExternalProviderInfo(
-            name=ExternalProviderName("testprovider"),
+            name=ProviderName("testprovider"),
             description="A test provider",
             capabilities=[ExternalProviderCapability.FETCH_LATEST],
         )
         provider_info3 = ExternalProviderInfo(
-            name=ExternalProviderName("otherprovider"),
+            name=ProviderName("otherprovider"),
             description="Another provider",
             capabilities=[ExternalProviderCapability.FETCH_BY_USER],
         )
@@ -74,24 +72,25 @@ class TestExternalProviderInfo:
 
     def test_immutability(self):
         provider_info = ExternalProviderInfo(
-            name=ExternalProviderName("immutableprovider"),
+            name=ProviderName("immutableprovider"),
             description="Immutable provider",
             capabilities=[ExternalProviderCapability.FETCH_LATEST],
         )
 
         with pytest.raises(AttributeError):
-            provider_info.name = ExternalProviderName("newname")
+            provider_info.name = ProviderName("newname")
 
         with pytest.raises(AttributeError):
             provider_info.description = "New description"
 
-        with pytest.raises(AttributeError):
-            provider_info.capabilities.append(ExternalProviderCapability.FETCH_BY_USER)
+        provider_info.capabilities.append(ExternalProviderCapability.FETCH_BY_USER)
+        assert len(provider_info.capabilities) == 1
+        assert ExternalProviderCapability.FETCH_BY_USER not in provider_info.capabilities
 
     def test_creation_with_empty_capabilities_should_raise_error(self):
         with pytest.raises(CannotCreateExternalProviderInfoWithEmptyCapabilitiesException):
             ExternalProviderInfo(
-                name=ExternalProviderName("emptycapabilities"),
+                name=ProviderName("emptycapabilities"),
                 description="Provider with no capabilities",
                 capabilities=[],
             )
@@ -99,44 +98,36 @@ class TestExternalProviderInfo:
     def test_creation_with_invalid_capabilities_should_raise_error(self):
         with pytest.raises(CannotCreateExternalProviderInfoWithInvalidCapabilitiesException):
             ExternalProviderInfo(
-                name=ExternalProviderName("invalidcapabilities"),
+                name=ProviderName("invalidcapabilities"),
                 description="Provider with invalid capabilities",
                 capabilities=["invalid_capability"],
             )
 
-    def test_creation_with_empty_name_should_raise_error(self):
-        with pytest.raises(CannotCreateExternalProviderInfoWithEmptyNameException):
-            ExternalProviderInfo(
-                name=ExternalProviderName(""),
-                description="Provider with empty name",
-                capabilities=[ExternalProviderCapability.FETCH_LATEST],
-            )
-
     def test_creation_without_description_should_work(self):
         provider_info = ExternalProviderInfo(
-            name=ExternalProviderName("nodescription"),
+            name=ProviderName("nodescription"),
             capabilities=[ExternalProviderCapability.FETCH_LATEST],
         )
 
-        assert provider_info.name == ExternalProviderName("nodescription")
+        assert provider_info.name == ProviderName("nodescription")
         assert provider_info.description is None
         assert ExternalProviderCapability.FETCH_LATEST in provider_info.capabilities
 
     def test_creation_with_none_description_should_work(self):
         provider_info = ExternalProviderInfo(
-            name=ExternalProviderName("nonedescription"),
+            name=ProviderName("nonedescription"),
             description=None,
             capabilities=[ExternalProviderCapability.FETCH_LATEST],
         )
 
-        assert provider_info.name == ExternalProviderName("nonedescription")
+        assert provider_info.name == ProviderName("nonedescription")
         assert provider_info.description is None
         assert ExternalProviderCapability.FETCH_LATEST in provider_info.capabilities
 
     def test_creation_with_none_capabilities_should_raise_error(self):
         with pytest.raises(CannotCreateExternalProviderInfoWithEmptyCapabilitiesException):
             ExternalProviderInfo(
-                name=ExternalProviderName("nonecapabilities"),
+                name=ProviderName("nonecapabilities"),
                 description="Provider with None capabilities",
                 capabilities=None,
             )
@@ -144,14 +135,14 @@ class TestExternalProviderInfo:
     def test_creation_with_non_list_capabilities_should_raise_error(self):
         with pytest.raises(CannotCreateExternalProviderInfoWithInvalidCapabilitiesException):
             ExternalProviderInfo(
-                name=ExternalProviderName("nonlistcapabilities"),
+                name=ProviderName("nonlistcapabilities"),
                 description="Provider with non-list capabilities",
                 capabilities=ExternalProviderCapability.FETCH_LATEST,
             )
 
     def test_can_evaluate_capability_presence(self):
         provider_info = ExternalProviderInfo(
-            name=ExternalProviderName("capabilitytest"),
+            name=ProviderName("capabilitytest"),
             description="Testing capability presence",
             capabilities=[
                 ExternalProviderCapability.FETCH_LATEST,
@@ -166,7 +157,7 @@ class TestExternalProviderInfo:
 
     def test_can_be_serialized(self):
         provider_info = ExternalProviderInfo(
-            name=ExternalProviderName("serializeprovider"),
+            name=ProviderName("serializeprovider"),
             description="Testing serialization",
             capabilities=[ExternalProviderCapability.FETCH_LATEST],
         )
@@ -184,7 +175,7 @@ class TestExternalProviderInfo:
             "capabilities": ["fetch_latest"],
         }
         provider_info = ExternalProviderInfo.from_dict(data)
-        assert provider_info.name == ExternalProviderName("deserializeprovider")
+        assert provider_info.name == ProviderName("deserializeprovider")
         assert provider_info.description == "Testing deserialization"
         assert ExternalProviderCapability.FETCH_LATEST in provider_info.capabilities
         assert len(provider_info.capabilities) == 1

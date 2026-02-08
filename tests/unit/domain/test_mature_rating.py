@@ -46,3 +46,7 @@ class TestRating:
 
         custom_instance = CustomClass(mature_rating="pg")
         assert custom_instance.mature_rating == MatureRating.PG
+
+    def test_repr_returns_enum_value(self):
+        mature_rating = MatureRating.PG_13
+        assert repr(mature_rating) == "pg-13"

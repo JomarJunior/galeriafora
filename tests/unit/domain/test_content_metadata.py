@@ -22,7 +22,7 @@ class TestContentMetadata:
             file_size_bytes=204800,
         )
         expected_str = (
-            "ContentMetadata(content_type=ContentType.IMAGE_PNG, "
+            "ContentMetadata(content_type=image/png, "
             "dimensions={'width': 1024, 'height': 768}, "
             "file_size_bytes=204800)"
         )
@@ -30,12 +30,12 @@ class TestContentMetadata:
 
     def test_repr_representation(self):
         content_metadata = ContentMetadata(
-            content_type=ContentType.IMAGE_GIF,
+            content_type=ContentType.GIF,
             dimensions={"width": 500, "height": 500},
             file_size_bytes=51200,
         )
         expected_repr = (
-            "ContentMetadata(content_type=ContentType.IMAGE_GIF, "
+            "ContentMetadata(content_type=image/gif, "
             "dimensions={'width': 500, 'height': 500}, "
             "file_size_bytes=51200)"
         )

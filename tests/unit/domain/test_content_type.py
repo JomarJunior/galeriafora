@@ -44,3 +44,7 @@ class TestContentType:
 
         custom_instance = CustomClass(content_type="image/jpeg")
         assert custom_instance.content_type == ContentType.IMAGE_JPEG
+
+    def test_repr_returns_enum_value(self):
+        content_type = ContentType.IMAGE_JPEG
+        assert repr(content_type) == "image/jpeg"

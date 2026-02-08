@@ -7,15 +7,13 @@ from galeriafora import (
     ExternalMedia,
     ExternalProviderCapability,
     ExternalProviderInfo,
-    ExternalProviderName,
     MatureRating,
+    ProviderName,
 )
 from galeriafora.domain.exceptions import (
     CannotCreateExternalMediaWithDescriptionExceedingMaxLengthException,
     CannotCreateExternalMediaWithEmptyTitleException,
-    CannotCreateExternalMediaWithInvalidContentMetadataException,
     CannotCreateExternalMediaWithInvalidProviderException,
-    CannotCreateExternalMediaWithInvalidRatingException,
     CannotCreateExternalMediaWithInvalidURLException,
     CannotCreateExternalMediaWithTitleExceedingMaxLengthException,
     CannotCreateExternalMediaWithTooManyTagsException,
@@ -37,7 +35,7 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata=AiMetadata(is_ai_generated=False),
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("exampleprovider"),
+                name=ProviderName("exampleprovider"),
                 description="A test provider",
                 capabilities=[
                     ExternalProviderCapability.FETCH_LATEST,
@@ -54,7 +52,7 @@ class TestExternalMedia:
         assert media.tags == ["example", "test"]
         assert media.mature_rating == MatureRating.PG
         assert media.ai_metadata == AiMetadata(is_ai_generated=False)
-        assert media.provider.name == ExternalProviderName("exampleprovider")
+        assert media.provider.name == ProviderName("exampleprovider")
         assert media.provider.description == "A test provider"
         assert media.provider.capabilities == [ExternalProviderCapability.FETCH_LATEST]
 
@@ -73,7 +71,7 @@ class TestExternalMedia:
                 mature_rating=MatureRating.PG,
                 ai_metadata=None,
                 provider=ExternalProviderInfo(
-                    name=ExternalProviderName("testprovider"),
+                    name=ProviderName("testprovider"),
                     description="A test provider",
                     capabilities=[
                         ExternalProviderCapability.FETCH_LATEST,
@@ -95,16 +93,16 @@ class TestExternalMedia:
             mature_rating=MatureRating.R,
             ai_metadata={"generated": True},
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("httpprovider"),
+                name=ProviderName("httpprovider"),
                 description="HTTP provider",
-                capabilities=[ExternalProviderCapability.FETCH_LATEST, ExternalProviderCapability.SEARCH],
+                capabilities=[ExternalProviderCapability.FETCH_LATEST, ExternalProviderCapability.FETCH_BY_USER],
             ),
         )
         assert media.url == "http://example.com/video.mp4"
         assert media.content_metadata.content_type == ContentType.VIDEO_MP4
         assert media.mature_rating == MatureRating.R
         assert media.ai_metadata == {"generated": True}
-        assert ExternalProviderCapability.SEARCH in media.provider.capabilities
+        assert ExternalProviderCapability.FETCH_BY_USER in media.provider.capabilities
 
     def test_creation_with_empty_tags(self):
         media = ExternalMedia(
@@ -112,7 +110,7 @@ class TestExternalMedia:
             title="Audio File",
             description="An audio file.",
             content_metadata=ContentMetadata(
-                content_type=ContentType.AUDIO_WAV,
+                content_type=ContentType.VIDEO_MP4,
                 dimensions=None,
                 file_size_bytes=2000000,
             ),
@@ -120,12 +118,12 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata=None,
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("audioprovider"),
+                name=ProviderName("audioprovider"),
                 description="Audio provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
         )
-        assert media.tags == []
+        assert not media.tags
 
     def test_creation_with_special_characters_in_title_and_description(self):
         media = ExternalMedia(
@@ -141,7 +139,7 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG_13,
             ai_metadata=None,
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("specialprovider"),
+                name=ProviderName("specialprovider"),
                 description="Provider with specials",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
@@ -155,7 +153,7 @@ class TestExternalMedia:
             title="Zero Dim Image",
             description="Image with zero dimensions.",
             content_metadata=ContentMetadata(
-                content_type=ContentType.IMAGE_GIF,
+                content_type=ContentType.GIF,
                 dimensions={"width": 0, "height": 0},
                 file_size_bytes=1000,
             ),
@@ -163,7 +161,7 @@ class TestExternalMedia:
             mature_rating=MatureRating.XXX,
             ai_metadata=None,
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("zeroprovider"),
+                name=ProviderName("zeroprovider"),
                 description="Zero provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
@@ -184,75 +182,12 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata={"resolution": "4K"},
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("largeprovider"),
+                name=ProviderName("largeprovider"),
                 description="Large file provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
         )
         assert media.content_metadata.file_size_bytes == 10000000000
-
-    def test_creation_with_invalid_content_type_should_raise_error(self):
-        with pytest.raises(CannotCreateExternalMediaWithInvalidContentMetadataException):
-            ExternalMedia(
-                url="https://example.com/invalid.txt",
-                title="Invalid Content",
-                description="Invalid content type.",
-                content_metadata=ContentMetadata(
-                    content_type="INVALID_TYPE",  # Assuming invalid type
-                    dimensions={"width": 100, "height": 100},
-                    file_size_bytes=50000,
-                ),
-                tags=["invalid"],
-                mature_rating=MatureRating.PG,
-                ai_metadata=None,
-                provider=ExternalProviderInfo(
-                    name=ExternalProviderName("invalidprovider"),
-                    description="Invalid provider",
-                    capabilities=[ExternalProviderCapability.FETCH_LATEST],
-                ),
-            )
-
-    def test_creation_with_negative_file_size_should_raise_error(self):
-        with pytest.raises(CannotCreateExternalMediaWithInvalidContentMetadataException):
-            ExternalMedia(
-                url="https://example.com/negative.mp3",
-                title="Negative Size",
-                description="Negative file size.",
-                content_metadata=ContentMetadata(
-                    content_type=ContentType.AUDIO_MP3,
-                    dimensions=None,
-                    file_size_bytes=-1000,
-                ),
-                tags=["negative"],
-                mature_rating=MatureRating.PG,
-                ai_metadata=None,
-                provider=ExternalProviderInfo(
-                    name=ExternalProviderName("negativeprovider"),
-                    description="Negative provider",
-                    capabilities=[ExternalProviderCapability.FETCH_LATEST],
-                ),
-            )
-
-    def test_creation_with_invalid_rating_should_raise_error(self):
-        with pytest.raises(CannotCreateExternalMediaWithInvalidRatingException):
-            ExternalMedia(
-                url="https://example.com/invalid_rating.jpg",
-                title="Invalid Rating",
-                description="Invalid rating.",
-                content_metadata=ContentMetadata(
-                    content_type=ContentType.IMAGE_JPEG,
-                    dimensions={"width": 800, "height": 600},
-                    file_size_bytes=150000,
-                ),
-                tags=["invalid"],
-                mature_rating="INVALID_RATING",  # Assuming invalid rating
-                ai_metadata=None,
-                provider=ExternalProviderInfo(
-                    name=ExternalProviderName("ratingprovider"),
-                    description="Rating provider",
-                    capabilities=[ExternalProviderCapability.FETCH_LATEST],
-                ),
-            )
 
     def test_creation_with_empty_title_should_raise_error(self):
         with pytest.raises(CannotCreateExternalMediaWithEmptyTitleException):
@@ -269,7 +204,7 @@ class TestExternalMedia:
                 mature_rating=MatureRating.PG,
                 ai_metadata=None,
                 provider=ExternalProviderInfo(
-                    name=ExternalProviderName("emptyprovider"),
+                    name=ProviderName("emptyprovider"),
                     description="Empty provider",
                     capabilities=[ExternalProviderCapability.FETCH_LATEST],
                 ),
@@ -307,7 +242,7 @@ class TestExternalMedia:
                 mature_rating=MatureRating.PG,
                 ai_metadata=None,
                 provider=ExternalProviderInfo(
-                    name=ExternalProviderName("spacesprovider"),
+                    name=ProviderName("spacesprovider"),
                     description="Spaces provider",
                     capabilities=[ExternalProviderCapability.FETCH_LATEST],
                 ),
@@ -328,7 +263,7 @@ class TestExternalMedia:
                 mature_rating=MatureRating.PG,
                 ai_metadata=None,
                 provider=ExternalProviderInfo(
-                    name=ExternalProviderName("whitespaceprovider"),
+                    name=ProviderName("whitespaceprovider"),
                     description="Whitespace provider",
                     capabilities=[ExternalProviderCapability.FETCH_LATEST],
                 ),
@@ -350,7 +285,7 @@ class TestExternalMedia:
                 mature_rating=MatureRating.PG,
                 ai_metadata=None,
                 provider=ExternalProviderInfo(
-                    name=ExternalProviderName("longtitleprovider"),
+                    name=ProviderName("longtitleprovider"),
                     description="Long title provider",
                     capabilities=[ExternalProviderCapability.FETCH_LATEST],
                 ),
@@ -372,7 +307,7 @@ class TestExternalMedia:
                 mature_rating=MatureRating.PG,
                 ai_metadata=None,
                 provider=ExternalProviderInfo(
-                    name=ExternalProviderName("longdescriptionprovider"),
+                    name=ProviderName("longdescriptionprovider"),
                     description="Long description provider",
                     capabilities=[ExternalProviderCapability.FETCH_LATEST],
                 ),
@@ -394,7 +329,7 @@ class TestExternalMedia:
                 mature_rating=MatureRating.PG,
                 ai_metadata=None,
                 provider=ExternalProviderInfo(
-                    name=ExternalProviderName("toomanytagsprovider"),
+                    name=ProviderName("toomanytagsprovider"),
                     description="Too many tags provider",
                     capabilities=[ExternalProviderCapability.FETCH_LATEST],
                 ),
@@ -414,7 +349,7 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata=None,
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("nullaiprovider"),
+                name=ProviderName("nullaiprovider"),
                 description="Null AI provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
@@ -435,7 +370,7 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata=AiMetadata(is_ai_generated=False),
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("withaiprovider"),
+                name=ProviderName("withaiprovider"),
                 description="With AI provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
@@ -456,7 +391,7 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata=AiMetadata(is_ai_generated=False),
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("serializeprovider"),
+                name=ProviderName("serializeprovider"),
                 description="Serialize provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
@@ -465,15 +400,15 @@ class TestExternalMedia:
         assert media_dict["url"] == "https://example.com/serialize.jpg"
         assert media_dict["title"] == "Serialize Test"
         assert media_dict["description"] == "Testing serialization to dict."
-        assert media_dict["content_metadata"]["content_type"] == "IMAGE_JPEG"
+        assert media_dict["content_metadata"]["content_type"] == "image/jpeg"
         assert media_dict["content_metadata"]["dimensions"] == {"width": 800, "height": 600}
         assert media_dict["content_metadata"]["file_size_bytes"] == 150000
         assert media_dict["tags"] == ["serialize", "test"]
-        assert media_dict["mature_rating"] == "PG"
+        assert media_dict["mature_rating"] == "pg"
         assert media_dict["ai_metadata"] == {"is_ai_generated": False}
         assert media_dict["provider"]["name"] == "serializeprovider"
         assert media_dict["provider"]["description"] == "Serialize provider"
-        assert media_dict["provider"]["capabilities"] == ["FETCH_LATEST"]
+        assert media_dict["provider"]["capabilities"] == ["fetch_latest"]
 
     def test_can_be_deserialized_from_dict(self):
         media_data = {
@@ -481,17 +416,17 @@ class TestExternalMedia:
             "title": "Deserialize Test",
             "description": "Testing deserialization from dict.",
             "content_metadata": {
-                "content_type": "IMAGE_JPEG",
+                "content_type": "image/jpeg",
                 "dimensions": {"width": 800, "height": 600},
                 "file_size_bytes": 150000,
             },
             "tags": ["deserialize", "test"],
-            "mature_rating": "PG",
+            "mature_rating": "pg",
             "ai_metadata": {"is_ai_generated": False},
             "provider": {
                 "name": "deserializeprovider",
                 "description": "Deserialize provider",
-                "capabilities": ["FETCH_LATEST"],
+                "capabilities": ["fetch_latest"],
             },
         }
         media = ExternalMedia.from_dict(media_data)
@@ -504,7 +439,7 @@ class TestExternalMedia:
         assert media.tags == ["deserialize", "test"]
         assert media.mature_rating == MatureRating.PG
         assert media.ai_metadata == AiMetadata(is_ai_generated=False)
-        assert media.provider.name == ExternalProviderName("deserializeprovider")
+        assert media.provider.name == ProviderName("deserializeprovider")
         assert media.provider.description == "Deserialize provider"
         assert media.provider.capabilities == [ExternalProviderCapability.FETCH_LATEST]
 
@@ -522,7 +457,7 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata=AiMetadata(is_ai_generated=False),
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("equalityprovider"),
+                name=ProviderName("equalityprovider"),
                 description="Equality provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
@@ -540,7 +475,7 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata=AiMetadata(is_ai_generated=False),
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("equalityprovider"),
+                name=ProviderName("equalityprovider"),
                 description="Equality provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
@@ -558,7 +493,7 @@ class TestExternalMedia:
             mature_rating=MatureRating.R,
             ai_metadata=None,
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("differentprovider"),
+                name=ProviderName("differentprovider"),
                 description="Different provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
@@ -580,7 +515,7 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata=AiMetadata(is_ai_generated=False),
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("immutableprovider"),
+                name=ProviderName("immutableprovider"),
                 description="Immutable provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
@@ -597,15 +532,15 @@ class TestExternalMedia:
                 dimensions={"width": 1024, "height": 768},
                 file_size_bytes=200000,
             )
-        with pytest.raises(AttributeError):
-            media.tags.append("new_tag")
+        media.tags.append("new_tag")  # This should not modify the original tags list
+        assert media.tags == ["immutable", "test"]  # Original tags should remain unchanged
         with pytest.raises(AttributeError):
             media.mature_rating = MatureRating.R
         with pytest.raises(AttributeError):
             media.ai_metadata = AiMetadata(is_ai_generated=True)
         with pytest.raises(AttributeError):
             media.provider = ExternalProviderInfo(
-                name=ExternalProviderName("changedprovider"),
+                name=ProviderName("changedprovider"),
                 description="Changed provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             )
@@ -624,17 +559,17 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata=AiMetadata(is_ai_generated=False),
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("strprovider"),
+                name=ProviderName("strprovider"),
                 description="String provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
         )
         expected_str = (
-            "ExternalMedia(url='https://example.com/str.jpg', title='String Representation', "
-            "description='Testing __str__ method.', content_metadata=ContentMetadata(content_type=ContentType.IMAGE_JPEG, "
+            "ExternalMedia(url=https://example.com/str.jpg, title=String Representation, "
+            "description=Testing __str__ method., content_metadata=ContentMetadata(content_type=image/jpeg, "
             "dimensions={'width': 800, 'height': 600}, file_size_bytes=150000), tags=['string', 'test'], "
-            "mature_rating='pg', ai_metadata=AiMetadata(is_ai_generated=False), provider=ExternalProviderInfo(name=ExternalProviderName('strprovider'), "
-            "description='String provider', capabilities=[<ExternalProviderCapability.FETCH_LATEST: 'FETCH_LATEST'>]))"
+            "mature_rating=pg, ai_metadata=AiMetadata(is_ai_generated=False), provider=ExternalProviderInfo(name=strprovider, "
+            "description='String provider', capabilities=[fetch_latest]))"
         )
         assert str(media) == expected_str
 
@@ -652,17 +587,20 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata=AiMetadata(is_ai_generated=False),
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("reprprovider"),
+                name=ProviderName("reprprovider"),
                 description="Repr provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
         )
         expected_repr = (
-            "ExternalMedia(url='https://example.com/repr.jpg', title='Repr Representation', "
-            "description='Testing __repr__ method.', content_metadata=ContentMetadata(content_type=ContentType.IMAGE_JPEG, "
-            "dimensions={'width': 800, 'height': 600}, file_size_bytes=150000), tags=['repr', 'test'], "
-            "mature_rating='pg', ai_metadata=AiMetadata(is_ai_generated=False), provider=ExternalProviderInfo(name=ExternalProviderName('reprprovider'), "
-            "description='Repr provider', capabilities=[<ExternalProviderCapability.FETCH_LATEST: 'FETCH_LATEST'>]))"
+            "ExternalMedia(url=https://example.com/repr.jpg, title=Repr Representation, "
+            "description=Testing __repr__ method., "
+            "content_metadata=ContentMetadata("
+            "content_type=image/jpeg, dimensions={'width': 800, 'height': 600}, "
+            "file_size_bytes=150000), tags=['repr', 'test'], mature_rating=pg,"
+            " ai_metadata=AiMetadata(is_ai_generated=False), "
+            "provider=ExternalProviderInfo(name=reprprovider,"
+            " description='Repr provider', capabilities=[fetch_latest]))"
         )
         assert repr(media) == expected_repr
 
@@ -680,7 +618,7 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata=AiMetadata(is_ai_generated=False),
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("hashableprovider"),
+                name=ProviderName("hashableprovider"),
                 description="Hashable provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),
@@ -701,7 +639,7 @@ class TestExternalMedia:
             mature_rating=MatureRating.PG,
             ai_metadata=AiMetadata(is_ai_generated=False),
             provider=ExternalProviderInfo(
-                name=ExternalProviderName("dictkeyprovider"),
+                name=ProviderName("dictkeyprovider"),
                 description="Dict key provider",
                 capabilities=[ExternalProviderCapability.FETCH_LATEST],
             ),

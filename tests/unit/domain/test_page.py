@@ -53,7 +53,7 @@ class TestPage:
         page3 = Page[int](
             items=[4, 5, 6],
             next_cursor="7",
-            has_more=False,
+            has_more=True,
         )
         assert page1 == page2
         assert page1 != page3
@@ -65,7 +65,7 @@ class TestPage:
             has_more=True,
         )
         with pytest.raises(AttributeError):
-            page.items.append(4)
+            page.items = [4, 5, 6]
         with pytest.raises(AttributeError):
             page.next_cursor = "5"
         with pytest.raises(AttributeError):
@@ -75,11 +75,11 @@ class TestPage:
         page = Page[str](
             items=["a", "b", "c"],
             next_cursor="d",
-            has_more=False,
+            has_more=True,
         )
         assert page.items == ["a", "b", "c"]
         assert page.next_cursor == "d"
-        assert page.has_more is False
+        assert page.has_more is True
 
     def test_can_be_created_with_empty_items(self):
         page = Page[int](
@@ -87,7 +87,7 @@ class TestPage:
             next_cursor=None,
             has_more=False,
         )
-        assert page.items == []
+        assert not page.items
         assert page.next_cursor is None
         assert page.has_more is False
 
