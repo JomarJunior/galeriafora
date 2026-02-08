@@ -22,10 +22,10 @@ from galeriafora import (
     ExternalProviderInfo,
     ExternalProviderName,
     IExternalProvider,
+    IProviderRegistry,
     MatureRating,
     MediaFetcher,
     Page,
-    ProviderRegistry,
 )
 from galeriafora.domain.exceptions import (
     CannotFetchLatestMediaProviderDoesNotSupportFetchLatestException,
@@ -166,7 +166,7 @@ def create_mock_provider_without_fetch_by_tags(name: str = "nofetchbytags") -> M
 
 def create_mock_registry(providers: list) -> Mock:
     """Create a mock ProviderRegistry using unittest.mock."""
-    mock_registry = Mock(spec=ProviderRegistry)
+    mock_registry = Mock(spec=IProviderRegistry)
     mock_registry.get_providers.return_value = providers
     return mock_registry
 
@@ -595,7 +595,7 @@ class TestMediaFetcherFetchByTags:
         assert len(media_page.items) == expected_count
         assert media_page.next_cursor is None
         assert media_page.has_more is False
-        mock_provider.fetch_by_tags.assert_called_once_with(tags, limit=DEFAULT_LIMIT)
+        mock_provider.fetch_by_tags.assert_called_once_with(tags or [], limit=DEFAULT_LIMIT)
 
     @pytest.mark.asyncio
     async def test_fetch_by_tags_with_valid_provider_name_and_existing_tags_should_return_media(

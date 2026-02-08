@@ -4,6 +4,8 @@ from galeriafora.domain.content_type import ContentType
 from galeriafora.domain.external_media import ExternalMedia
 from galeriafora.domain.external_provider_capability import ExternalProviderCapability
 from galeriafora.domain.external_provider_info import ExternalProviderInfo
+from galeriafora.domain.i_external_provider import IExternalProvider
+from galeriafora.domain.i_provider_registry import IProviderRegistry
 from galeriafora.domain.mature_rating import MatureRating
 from galeriafora.domain.page import Page
 from galeriafora.domain.provider_name import ProviderName
@@ -18,4 +20,6 @@ __all__ = [
     "ExternalProviderCapability",
     "ExternalProviderInfo",
     "ExternalMedia",
+    "IExternalProvider",
+    "IProviderRegistry",
 ]

@@ -12,6 +12,10 @@ Key components:
 - api: REST endpoints for MiraVeja integration
 """
 
+from galeriafora.application import (
+    MediaFetcher,
+    MediaUploader,
+)
 from galeriafora.domain import (
     AiMetadata,
     ContentMetadata,
@@ -19,6 +23,8 @@ from galeriafora.domain import (
     ExternalMedia,
     ExternalProviderCapability,
     ExternalProviderInfo,
+    IExternalProvider,
+    IProviderRegistry,
     MatureRating,
     Page,
     ProviderName,
@@ -28,12 +34,16 @@ __version__ = "0.1.0"
 __author__ = "Jomar Júnior de Souza Pereira"
 __email__ = "jomarjunior@poli.ufrj.br"
 
+# Aliases for clarity - ExternalProviderName is the same as ProviderName
+ExternalProviderName = ProviderName
+
 __all__ = [
     "__version__",
     "__author__",
     "__email__",
     # Domain models
     "ProviderName",
+    "ExternalProviderName",
     "Page",
     "MatureRating",
     "ContentType",
@@ -42,4 +52,9 @@ __all__ = [
     "ExternalProviderCapability",
     "ExternalProviderInfo",
     "ExternalMedia",
+    "IExternalProvider",
+    "IProviderRegistry",
+    # Application services
+    "MediaFetcher",
+    "MediaUploader",
 ]

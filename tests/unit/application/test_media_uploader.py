@@ -22,9 +22,9 @@ from galeriafora import (
     ExternalProviderInfo,
     ExternalProviderName,
     IExternalProvider,
+    IProviderRegistry,
     MatureRating,
     MediaUploader,
-    ProviderRegistry,
 )
 from galeriafora.domain.exceptions import (
     CannotInitializeMediaUploaderWithInvalidProviderRegistryException,
@@ -128,7 +128,7 @@ def create_mock_provider_without_upload(name: str = "nouploadprovider") -> Mock:
 
 def create_mock_registry(providers: list) -> Mock:
     """Create a mock ProviderRegistry using unittest.mock."""
-    mock_registry = Mock(spec=ProviderRegistry)
+    mock_registry = Mock(spec=IProviderRegistry)
     mock_registry.get_providers.return_value = providers
     return mock_registry
 
@@ -267,7 +267,7 @@ class TestMediaUploaderUpload:
 
         # Assert
         assert result is True
-        mock_provider.upload.assert_called_once_with(test_media)
+        mock_provider.upload.assert_called_once_with([test_media])
 
     @pytest.mark.asyncio
     async def test_upload_with_valid_provider_name_but_upload_fails_should_return_false(
@@ -275,14 +275,14 @@ class TestMediaUploaderUpload:
     ):
         """Should return False when provider upload fails."""
         # Arrange
-        mock_provider.upload.return_value = False
+        mock_provider.upload.side_effect = Exception("Upload failed")
 
         # Act
         result = await single_provider_media_uploader.upload(provider_name="mockprovider", media=test_media)
 
         # Assert
         assert result is False
-        mock_provider.upload.assert_called_once_with(test_media)
+        mock_provider.upload.assert_called_once_with([test_media])
 
     @pytest.mark.asyncio
     async def test_upload_with_multiple_providers_should_upload_to_correct_provider(
@@ -299,7 +299,7 @@ class TestMediaUploaderUpload:
 
         # Assert
         assert result is True
-        provider2.upload.assert_called_once_with(test_media)
+        provider2.upload.assert_called_once_with([test_media])
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -334,8 +334,7 @@ class TestMediaUploaderUploadToMultiple:
         # Arrange
         providers = multiple_providers_media_uploader.provider_registry.get_providers()
         provider1, provider2 = providers[0], providers[1]
-        provider1.upload.return_value = True
-        provider2.upload.return_value = False
+        provider2.upload.side_effect = Exception("Upload failed")
 
         # Act
         results = await multiple_providers_media_uploader.upload_to_multiple(
@@ -347,8 +346,8 @@ class TestMediaUploaderUploadToMultiple:
         assert len(results) == 2
         assert results["mockprovider"] is True
         assert results["mockprovider2"] is False
-        provider1.upload.assert_called_once_with(test_media)
-        provider2.upload.assert_called_once_with(test_media)
+        provider1.upload.assert_called_once_with([test_media])
+        provider2.upload.assert_called_once_with([test_media])
 
     @pytest.mark.asyncio
     async def test_upload_to_multiple_with_empty_provider_list_should_return_empty_dict(
@@ -403,9 +402,7 @@ class TestMediaUploaderUploadToMultiple:
         provider2 = create_mock_provider("failure")
         provider3 = create_mock_provider("another_success")
 
-        provider1.upload.return_value = True
-        provider2.upload.return_value = False
-        provider3.upload.return_value = True
+        provider2.upload.side_effect = Exception("Upload failed")
 
         registry = create_mock_registry([provider1, provider2, provider3])
         media_uploader = MediaUploader(provider_registry=registry)
@@ -417,6 +414,6 @@ class TestMediaUploaderUploadToMultiple:
 
         # Assert
         assert results == {"success": True, "failure": False, "another_success": True}
-        provider1.upload.assert_called_once_with(test_media)
-        provider2.upload.assert_called_once_with(test_media)
-        provider3.upload.assert_called_once_with(test_media)
+        provider1.upload.assert_called_once_with([test_media])
+        provider2.upload.assert_called_once_with([test_media])
+        provider3.upload.assert_called_once_with([test_media])

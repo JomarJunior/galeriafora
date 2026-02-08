@@ -55,6 +55,54 @@ from galeriafora.domain.exceptions.cannot_create_provider_name_with_empty_name_e
 from galeriafora.domain.exceptions.cannot_create_provider_name_with_non_string_name_exception import (
     CannotCreateProviderNameWithNonStringNameException,
 )
+from galeriafora.domain.exceptions.cannot_fetch_latest_media_provider_does_not_support_fetch_latest_exception import (
+    CannotFetchLatestMediaProviderDoesNotSupportFetchLatestException,
+)
+from galeriafora.domain.exceptions.cannot_fetch_latest_media_with_invalid_provider_name_exception import (
+    CannotFetchLatestMediaWithInvalidProviderNameException,
+)
+from galeriafora.domain.exceptions.cannot_fetch_latest_media_without_registered_providers_exception import (
+    CannotFetchLatestMediaWithoutRegisteredProvidersException,
+)
+from galeriafora.domain.exceptions.cannot_fetch_media_by_tags_provider_does_not_support_fetch_by_tags_exception import (
+    CannotFetchMediaByTagsProviderDoesNotSupportFetchByTagsException,
+)
+from galeriafora.domain.exceptions.cannot_fetch_media_by_tags_with_invalid_provider_name_exception import (
+    CannotFetchMediaByTagsWithInvalidProviderNameException,
+)
+from galeriafora.domain.exceptions.cannot_fetch_media_by_tags_without_registered_providers_exception import (
+    CannotFetchMediaByTagsWithoutRegisteredProvidersException,
+)
+from galeriafora.domain.exceptions.cannot_fetch_media_by_user_provider_does_not_support_fetch_by_user_exception import (
+    CannotFetchMediaByUserProviderDoesNotSupportFetchByUserException,
+)
+from galeriafora.domain.exceptions.cannot_fetch_media_by_user_with_invalid_provider_name_exception import (
+    CannotFetchMediaByUserWithInvalidProviderNameException,
+)
+from galeriafora.domain.exceptions.cannot_fetch_media_by_user_without_registered_providers_exception import (
+    CannotFetchMediaByUserWithoutRegisteredProvidersException,
+)
+from galeriafora.domain.exceptions.cannot_initialize_media_fetcher_with_invalid_provider_registry_exception import (
+    CannotInitializeMediaFetcherWithInvalidProviderRegistryException,
+)
+from galeriafora.domain.exceptions.cannot_initialize_media_uploader_with_invalid_provider_registry_exception import (
+    CannotInitializeMediaUploaderWithInvalidProviderRegistryException,
+)
+from galeriafora.domain.exceptions.cannot_upload_media_provider_does_not_support_upload_exception import (
+    CannotUploadMediaProviderDoesNotSupportUploadException,
+)
+from galeriafora.domain.exceptions.cannot_upload_media_to_multiple_with_invalid_provider_name_exception import (
+    CannotUploadMediaToMultipleWithInvalidProviderNameException,
+)
+from galeriafora.domain.exceptions.cannot_upload_media_to_multiple_without_registered_providers_exception import (
+    CannotUploadMediaToMultipleWithoutRegisteredProvidersException,
+)
+from galeriafora.domain.exceptions.cannot_upload_media_with_invalid_provider_name_exception import (
+    CannotUploadMediaWithInvalidProviderNameException,
+)
+from galeriafora.domain.exceptions.cannot_upload_media_without_registered_providers_exception import (
+    CannotUploadMediaWithoutRegisteredProvidersException,
+)
 
 __all__ = [
     "CannotCreateProviderNameThatNormalizesToEmptyException",
@@ -76,4 +124,20 @@ __all__ = [
     "CannotCreateExternalMediaWithInvalidProviderException",
     "CannotCreateExternalMediaWithInvalidContentMetadataException",
     "CannotCreateExternalMediaWithInvalidRatingException",
+    "CannotInitializeMediaFetcherWithInvalidProviderRegistryException",
+    "CannotFetchLatestMediaWithInvalidProviderNameException",
+    "CannotFetchLatestMediaWithoutRegisteredProvidersException",
+    "CannotFetchLatestMediaProviderDoesNotSupportFetchLatestException",
+    "CannotFetchMediaByUserWithInvalidProviderNameException",
+    "CannotFetchMediaByUserWithoutRegisteredProvidersException",
+    "CannotFetchMediaByUserProviderDoesNotSupportFetchByUserException",
+    "CannotFetchMediaByTagsWithInvalidProviderNameException",
+    "CannotFetchMediaByTagsWithoutRegisteredProvidersException",
+    "CannotFetchMediaByTagsProviderDoesNotSupportFetchByTagsException",
+    "CannotInitializeMediaUploaderWithInvalidProviderRegistryException",
+    "CannotUploadMediaWithInvalidProviderNameException",
+    "CannotUploadMediaWithoutRegisteredProvidersException",
+    "CannotUploadMediaProviderDoesNotSupportUploadException",
+    "CannotUploadMediaToMultipleWithInvalidProviderNameException",
+    "CannotUploadMediaToMultipleWithoutRegisteredProvidersException",
 ]
